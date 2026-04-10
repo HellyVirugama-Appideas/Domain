@@ -39,7 +39,8 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>OS</th>
+          <th>IP Address</th>
+        
           <th>Device</th>
           <th>Clicks</th>
           <th>Pages Visited</th>
@@ -53,7 +54,7 @@
         <tr>
           <td style="color:var(--muted);font-size:.78rem;font-weight:600;"><%= idx+1 %></td>
           <td style="font-family:monospace;font-size:.82rem;color:var(--text2);"><%= v.ip||'—' %></td>
-          <td style="font-size:.82rem;color:var(--text2);"><%= v.os||'Unknown' %></td>
+        
           <td>
             <span class="dev-chip <%= v.device==='Mobile'?'dev-mobile':v.device==='Tablet'?'dev-tablet':'dev-desktop' %>">
               <% if(v.device==='Mobile'){ %>📱
