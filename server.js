@@ -76,22 +76,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ====================== SESSION SETUP (Most Important Fix) ======================
+app.set("trust proxy", 1);
+
 app.use(session({
   name: "domania.sid",
-  secret: "super-secret-2026",
+  secret: "super-secret",
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
   }),
   cookie: {
-    maxAge: 1000 * 60 * 30,
     httpOnly: true,
-    secure: false,        // ⚠️ localhost → false
-    sameSite: "lax",      // 🔥 CHANGE THIS (NOT none)
+    secure: true,          // 🔥 HTTPS REQUIRED
+    sameSite: "none",      // 🔥 CROSS DOMAIN REQUIRED
+    maxAge: 1000 * 60 * 30,
   },
 }));
-
 // ====================== DATABASE ======================
 connectDB();
 
