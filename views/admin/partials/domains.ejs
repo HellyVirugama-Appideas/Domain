@@ -1,0 +1,347 @@
+<!-- ═══════════════════════════════
+     PAGE 0: DOMAINS
+═══════════════════════════════ -->
+<div class="page active" id="page-0">
+
+  <!-- STAT CARDS — sirf Domains tab pe dikhte hain -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue">🌐</div>
+      <div class="stat-info"><div class="val"><%= domains.length %></div><div class="lbl">Total Domains</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-gold">📬</div>
+      <div class="stat-info"><div class="val"><%= inquiries.length %></div><div class="lbl">Total Inquiries</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">🆕</div>
+      <div class="stat-info"><div class="val"><%= inquiries.filter(i=>i.status==='new').length %></div><div class="lbl">New Inquiries</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-teal">📅</div>
+      <div class="stat-info"><div class="val"><%= todayVisitors %></div><div class="lbl">Today's Visitors</div></div>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <div><h2>Domain Listings</h2><p>Manage all your domains for sale</p></div>
+    <button class="btn-primary" onclick="openAdd()"><i class="fa fa-plus"></i> Add Domain</button>
+  </div>
+
+  <% if(domains.length === 0){ %>
+    <div class="tbl-card"><div class="empty"><div class="e-ico">🌐</div><p>No domains yet. Click "Add Domain" to get started.</p></div></div>
+  <% } else { %>
+  <div class="tbl-card">
+
+    <!-- Search + Pagination info bar -->
+    <div class="tbl-head" style="flex-wrap:wrap;gap:12px;">
+      <div>
+        <h3>All Domains</h3>
+        <p id="d-count-label"><%= domains.length %> domain<%= domains.length!==1?'s':'' %> listed</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+        <!-- Search bar -->
+        <div style="position:relative;">
+          <i class="fa fa-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none;"></i>
+          <input
+            type="text"
+            id="domain-search"
+            placeholder="Search domains..."
+            oninput="domainSearch()"
+            style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 12px 8px 32px;font-family:'Inter',sans-serif;font-size:.82rem;color:var(--text);outline:none;width:200px;transition:border-color .2s;"
+            onfocus="this.style.borderColor='var(--blue)'"
+            onblur="this.style.borderColor='var(--border)'"
+          />
+        </div>
+        <!-- Per-page select -->
+        <select id="d-per-page" onchange="domainRender()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:9px;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;cursor:pointer;">
+          <option value="5">5 / page</option>
+          <option value="10" selected>10 / page</option>
+          <option value="20">20 / page</option>
+          <option value="50">50 / page</option>
+        </select>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Domain</th>
+          <th>Price</th>
+          <th>Features</th>
+          <th>Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="domain-tbody">
+        <!-- Rows inject kiye jaate hain JS se -->
+      </tbody>
+    </table>
+
+    <!-- Pagination bar -->
+    <div id="d-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;">
+      <span id="d-page-info" style="font-size:.8rem;color:var(--muted);"></span>
+      <div id="d-page-btns" style="display:flex;gap:6px;"></div>
+    </div>
+
+  </div>
+  <% } %>
+</div>
+
+<!-- ── Domain JS (search + pagination) ───────────────── -->
+<script>
+// Raw domain data from EJS → JS array
+const ALL_DOMAINS = <%- JSON.stringify(domains.map(function(d){ return {
+  _id:         d._id,
+  name:        d.name,
+  description: d.description || '',
+  price:       d.price,
+  img:         d.img || '',
+  features:    d.features || [],
+  createdAt:   d.createdAt
+}; })) %>;
+
+let dFiltered  = [...ALL_DOMAINS];  // search ke baad filtered list
+let dPage      = 1;                 // current page
+
+// Search — name ya description match karo
+function domainSearch() {
+  const q = document.getElementById('domain-search').value.trim().toLowerCase();
+  dFiltered = q
+    ? ALL_DOMAINS.filter(d =>
+        d.name.toLowerCase().includes(q) ||
+        d.description.toLowerCase().includes(q) ||
+        String(d.price).includes(q)
+      )
+    : [...ALL_DOMAINS];
+  dPage = 1;
+  domainRender();
+}
+
+// Render current page rows + pagination
+function domainRender() {
+  const perPage = parseInt(document.getElementById('d-per-page').value);
+  const total   = dFiltered.length;
+  const pages   = Math.max(1, Math.ceil(total / perPage));
+  if (dPage > pages) dPage = pages;
+
+  const start = (dPage - 1) * perPage;
+  const slice = dFiltered.slice(start, start + perPage);
+
+  // ── Tbody ──
+  const tbody = document.getElementById('domain-tbody');
+  if (!slice.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted);font-size:.88rem;">No domains found.</td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(function(d) {
+      const dateStr  = new Date(d.createdAt).toLocaleDateString('en-IN');
+      const featHtml = d.features.slice(0,2).map(function(f){
+        return `<span class="feat-chip">${f}</span>`;
+      }).join('') + (d.features.length > 2 ? `<span class="feat-chip" style="background:var(--bg);color:var(--muted);">+${d.features.length-2}</span>` : '');
+
+      const imgHtml = d.img
+        ? `<img src="${d.img}" alt="" class="d-thumb" />`
+        : `<div class="d-thumb-ph">🌐</div>`;
+
+      const enc     = encodeURIComponent;
+      const encDesc = enc(d.description);
+      const encFeat = enc(JSON.stringify(d.features));
+
+      return `<tr>
+        <td>${imgHtml}</td>
+        <td>
+          <div class="d-name">${d.name}</div>
+          <div class="d-desc">${d.description.substring(0,55)}${d.description.length>55?'…':''}</div>
+        </td>
+        <td><span class="price-tag">$${d.price}</span></td>
+        <td><div class="feat-chips">${featHtml}</div></td>
+        <td style="color:var(--muted);font-size:.78rem;white-space:nowrap;">${dateStr}</td>
+        <td>
+          <div class="actions">
+            <button class="act-btn act-view" title="View"
+              data-id="${d._id}" data-name="${d.name}" data-price="${d.price}"
+              data-desc="${encDesc}" data-img="${d.img}"
+              data-features="${encFeat}" data-date="${dateStr}"
+              onclick="viewDomain(this)"><i class="fa fa-eye"></i></button>
+            <button class="act-btn act-edit" title="Edit"
+              data-id="${d._id}" data-name="${d.name}" data-price="${d.price}"
+              data-desc="${encDesc}" data-img="${d.img}"
+              data-features="${encFeat}"
+              onclick="editDomain(this)"><i class="fa fa-pen"></i></button>
+            <form action="/admin/domains/${d._id}/delete" method="POST" style="display:inline;">
+              <button type="submit" class="act-btn act-del" title="Delete"
+                onclick="return confirm('Delete ${d.name}?')">
+                <i class="fa fa-trash"></i></button>
+            </form>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Page info ──
+  const showing = slice.length;
+  document.getElementById('d-page-info').textContent =
+    total === 0 ? 'No results' :
+    `Showing ${start+1}–${start+showing} of ${total} domain${total!==1?'s':''}`;
+
+  // Update count label
+  const q = document.getElementById('domain-search').value.trim();
+  document.getElementById('d-count-label').textContent =
+    q ? `${total} result${total!==1?'s':''} for "${q}"` :
+        `${total} domain${total!==1?'s':''} listed`;
+
+  // ── Pagination buttons ──
+  const btnWrap = document.getElementById('d-page-btns');
+  btnWrap.innerHTML = '';
+
+  // Prev
+  const prev = document.createElement('button');
+  prev.innerHTML = '<i class="fa fa-chevron-left"></i>';
+  prev.className = 'pg-btn' + (dPage === 1 ? ' pg-disabled' : '');
+  prev.disabled  = dPage === 1;
+  prev.onclick   = function(){ if(dPage>1){ dPage--; domainRender(); } };
+  btnWrap.appendChild(prev);
+
+  // Page number buttons — show max 5
+  const range = pgRange(dPage, pages);
+  range.forEach(function(p) {
+    if (p === '…') {
+      const ellipsis = document.createElement('span');
+      ellipsis.textContent = '…';
+      ellipsis.style.cssText = 'padding:0 6px;color:var(--muted);font-size:.82rem;align-self:center;';
+      btnWrap.appendChild(ellipsis);
+    } else {
+      const btn = document.createElement('button');
+      btn.textContent = p;
+      btn.className   = 'pg-btn' + (p === dPage ? ' pg-active' : '');
+      btn.onclick     = function(){ dPage = p; domainRender(); };
+      btnWrap.appendChild(btn);
+    }
+  });
+
+  // Next
+  const next = document.createElement('button');
+  next.innerHTML = '<i class="fa fa-chevron-right"></i>';
+  next.className = 'pg-btn' + (dPage === pages ? ' pg-disabled' : '');
+  next.disabled  = dPage === pages;
+  next.onclick   = function(){ if(dPage<pages){ dPage++; domainRender(); } };
+  btnWrap.appendChild(next);
+}
+
+// Smart page range — 1 2 3 … 8 9 10
+function pgRange(current, total) {
+  if (total <= 7) return Array.from({length:total},(_,i)=>i+1);
+  if (current <= 4) return [1,2,3,4,5,'…',total];
+  if (current >= total-3) return [1,'…',total-4,total-3,total-2,total-1,total];
+  return [1,'…',current-1,current,current+1,'…',total];
+}
+
+// Init on load
+domainRender();
+</script>
+
+<!-- Pagination button styles (scoped here so no conflict) -->
+<style>
+  .pg-btn {
+    min-width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
+    background:var(--white); color:var(--text); font-size:.82rem; font-weight:500;
+    cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s;
+    display:inline-flex; align-items:center; justify-content:center; padding:0 10px;
+  }
+  .pg-btn:hover:not(.pg-disabled) { background:var(--blue-light); border-color:var(--blue-soft); color:var(--blue); }
+  .pg-btn.pg-active { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:700; }
+  .pg-btn.pg-disabled { opacity:.4; cursor:not-allowed; }
+</style>
+
+<!-- DOMAIN VIEW MODAL -->
+<div class="overlay" id="view-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="vm-title">Domain Details</h3>
+      <button class="modal-close" onclick="closeOverlay('view-overlay')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-hero">
+        <div id="vm-img-wrap"></div>
+        <div style="flex:1;">
+          <div class="view-domain-name" id="vm-name">—</div>
+          <div class="view-domain-desc" id="vm-desc">—</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="view-price" id="vm-price">—</div>
+            <div class="view-price-lbl">Listing Price</div>
+          </div>
+        </div>
+      </div>
+      <p class="view-sect">Included Features</p>
+      <div class="view-features" id="vm-features"></div>
+      <p class="view-sect">Domain Info</p>
+      <div class="view-meta">
+        <div class="view-meta-item"><div class="m-lbl">Domain Name</div><div class="m-val" id="vm-meta-name">—</div></div>
+        <div class="view-meta-item"><div class="m-lbl">Listing Price</div><div class="m-val" id="vm-meta-price" style="color:var(--green)">—</div></div>
+        <div class="view-meta-item"><div class="m-lbl">Date Added</div><div class="m-val" id="vm-meta-date">—</div></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOverlay('view-overlay')">Close</button>
+      <button class="btn-primary" id="vm-edit-btn"><i class="fa fa-pen"></i> Edit Domain</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT DOMAIN MODAL -->
+<div class="overlay" id="form-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="form-title">Add New Domain</h3>
+      <button class="modal-close" onclick="closeOverlay('form-overlay')">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="domain-form" action="/admin/domains" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="id" id="f-id" />
+        <div class="mrow">
+          <div class="mf">
+            <label>Domain Name <span style="color:var(--danger)">*</span></label>
+            <input type="text" name="name" id="f-name" placeholder="example.com" required />
+          </div>
+          <div class="mf">
+            <label>Price (USD) <span style="color:var(--danger)">*</span></label>
+            <input type="number" name="price" id="f-price" placeholder="375" min="1" required />
+          </div>
+        </div>
+        <div class="mf">
+          <label>Description <span style="color:var(--danger)">*</span></label>
+          <textarea name="description" id="f-desc" placeholder="Short description..." required></textarea>
+        </div>
+        <div class="mf">
+          <label>Feature Points —
+            <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--muted)">
+              press Enter to add each
+            </span>
+          </label>
+          <div class="ftag-wrap" id="ftag-wrap" onclick="document.getElementById('ftag-input').focus()">
+            <input id="ftag-input" class="ftag-input" placeholder="Type a feature and press Enter…" onkeydown="addFTag(event)" />
+          </div>
+          <textarea name="features" id="f-features" style="display:none;"></textarea>
+          <p class="hint">e.g. Free Domain Registration · Free Security Suite · Strong Keywords</p>
+        </div>
+        <div class="mf">
+          <label>Domain Image <span style="color:var(--danger)">*</span></label>
+          <label class="file-label" for="f-img">
+            <i class="fa fa-cloud-arrow-up" style="color:var(--blue)"></i>
+            <span id="file-display">Click to upload image (JPG, PNG, WebP)</span>
+          </label>
+          <input type="file" name="img" id="f-img" accept="image/*" onchange="updateFileName(this)" />
+          <p class="hint" id="img-hint" style="display:none;color:var(--blue);">ℹ Leave blank to keep the existing image</p>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOverlay('form-overlay')">Cancel</button>
+      <button class="btn-primary" onclick="document.getElementById('domain-form').submit()">
+        <i class="fa fa-save"></i> <span id="form-submit-lbl">Save Domain</span>
+      </button>
+    </div>
+  </div>
+</div>

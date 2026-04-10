@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domania — Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:         #f0f6ff;
+      --white:      #ffffff;
+      --blue:       #2563eb;
+      --blue-h:     #1d4ed8;
+      --blue-light: #eff6ff;
+      --blue-mid:   #dbeafe;
+      --blue-soft:  #bfdbfe;
+      --text:       #1e293b;
+      --text2:      #334155;
+      --muted:      #64748b;
+      --border:     #e2eaf4;
+      --border2:    #cbd5e1;
+      --green:      #10b981;
+      --green-bg:   #ecfdf5;
+      --gold:       #f59e0b;
+      --gold-bg:    #fffbeb;
+      --danger:     #ef4444;
+      --danger-bg:  #fef2f2;
+      --purple:     #8b5cf6;
+      --purple-bg:  #f5f3ff;
+      --shadow-sm:  0 1px 3px rgba(37,99,235,0.08), 0 1px 2px rgba(37,99,235,0.04);
+      --shadow:     0 4px 16px rgba(37,99,235,0.10);
+      --shadow-lg:  0 12px 40px rgba(37,99,235,0.14);
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+
+    /* ═══════════════════════════════════════════════
+       TOP NAVBAR
+    ═══════════════════════════════════════════════ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 64px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center;
+      padding: 0 28px;
+      gap: 0;
+    }
+
+    /* Brand */
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      margin-right: 36px; text-decoration: none;
+    }
+    .nav-brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue), #1e40af);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(37,99,235,.3);
+    }
+    .nav-brand h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem; font-weight: 800; color: var(--text);
+    }
+    .nav-brand span { font-size: .68rem; color: var(--muted); margin-top: 1px; letter-spacing: .4px; }
+
+    /* Divider */
+    .nav-div { width: 1px; height: 28px; background: var(--border); margin-right: 28px; }
+
+    /* Nav tabs */
+    .nav-tabs { display: flex; align-items: center; gap: 4px; flex: 1; }
+    .nav-tab {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 16px; border-radius: 9px;
+      font-size: .86rem; font-weight: 500; color: var(--muted);
+      cursor: pointer; border: none; background: none;
+      font-family: 'Inter', sans-serif;
+      transition: all .2s; position: relative;
+      white-space: nowrap;
+    }
+    .nav-tab:hover { background: var(--blue-light); color: var(--blue); }
+    .nav-tab.active {
+      background: var(--blue-light);
+      color: var(--blue); font-weight: 600;
+    }
+    .nav-tab .tab-icon { font-size: .88rem; }
+    .nav-tab .tab-badge {
+      background: var(--blue); color: #fff;
+      font-size: .62rem; font-weight: 700;
+      padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center;
+    }
+    .nav-tab .tab-badge.gold { background: var(--gold); }
+
+    /* Right side of navbar */
+    .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .nav-stat-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      border-radius: 8px; padding: 5px 12px; font-size: .78rem;
+      color: var(--blue); font-weight: 600;
+    }
+    .nav-logout {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 9px;
+      border: 1px solid var(--border2); background: var(--white);
+      color: var(--muted); font-size: .82rem; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all .2s; text-decoration: none;
+    }
+    .nav-logout:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+
+    /* ═══════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════ */
+    .main {
+      margin-top: 64px;
+      padding: 28px 32px;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* Alert toasts */
+    .alert-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 18px; border-radius: 12px;
+      font-size: .85rem; margin-bottom: 22px;
+      animation: slideDown .4s ease both;
+      font-weight: 500;
+    }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .alert-success { background: var(--green-bg); border: 1px solid #a7f3d0; color: #065f46; }
+    .alert-error   { background: var(--danger-bg); border: 1px solid #fecaca; color: #991b1b; }
+
+    /* Page sections */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Page header */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.4rem; font-weight: 800; color: var(--text);
+    }
+    .page-header p { font-size: .82rem; color: var(--muted); margin-top: 3px; }
+
+    /* ═══════════════════════════════════════════════
+       STAT CARDS
+    ═══════════════════════════════════════════════ */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      display: flex; align-items: center; gap: 16px;
+      transition: box-shadow .2s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow); }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .si-blue   { background: var(--blue-light); }
+    .si-green  { background: var(--green-bg); }
+    .si-gold   { background: var(--gold-bg); }
+    .si-purple { background: var(--purple-bg); }
+    .stat-info .val {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.7rem; font-weight: 800; color: var(--text); line-height: 1;
+    }
+    .stat-info .lbl { font-size: .76rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+    /* ═══════════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════════ */
+    .tbl-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .tbl-card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; border-bottom: 1px solid var(--border);
+    }
+    .tbl-card-head h3 { font-size: .95rem; font-weight: 700; color: var(--text); }
+    .tbl-card-head p  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--bg);
+      padding: 13px 20px;
+      font-size: .71rem; font-weight: 700; color: var(--muted);
+      letter-spacing: .7px; text-transform: uppercase;
+      text-align: left; border-bottom: 1px solid var(--border);
+    }
+    tbody td {
+      padding: 14px 20px; font-size: .86rem;
+      border-bottom: 1px solid var(--border); vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover td { background: var(--blue-light); }
+
+    /* Domain row elements */
+    .d-thumb {
+      width: 44px; height: 44px; border-radius: 10px; object-fit: cover;
+      border: 1px solid var(--border); background: var(--bg);
+    }
+    .d-thumb-ph {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .d-name { font-weight: 600; color: var(--text); font-size: .9rem; }
+    .d-desc { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    .price-tag {
+      font-weight: 700; color: var(--green); font-size: .95rem;
+      background: var(--green-bg); border: 1px solid #a7f3d0;
+      padding: 3px 10px; border-radius: 8px; display: inline-block;
+    }
+
+    /* Feature chips */
+    .feat-chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 240px; }
+    .feat-chip {
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      color: var(--blue); font-size: .69rem; font-weight: 500;
+      padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+    }
+
+    /* Action buttons */
+    .actions { display: flex; gap: 6px; align-items: center; }
+    .act-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); background: var(--white);
+      cursor: pointer; font-size: .8rem; transition: all .2s;
+    }
+    .act-view  { color: var(--blue); }
+    .act-view:hover  { background: var(--blue-light); border-color: var(--blue-soft); color: var(--blue-h); }
+    .act-edit  { color: var(--gold); }
+    .act-edit:hover  { background: var(--gold-bg); border-color: #fde68a; }
+    .act-del   { color: var(--danger); }
+    .act-del:hover   { background: var(--danger-bg); border-color: #fecaca; }
+
+    /* Status badges */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: .74rem; font-weight: 600;
+    }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .badge-new      { background: var(--gold-bg);    color: #92400e; border: 1px solid #fde68a; }
+    .badge-new::before      { background: var(--gold); }
+    .badge-contacted{ background: var(--blue-light); color: var(--blue-h); border: 1px solid var(--blue-soft); }
+    .badge-contacted::before{ background: var(--blue); }
+    .badge-closed   { background: var(--green-bg);   color: #065f46; border: 1px solid #a7f3d0; }
+    .badge-closed::before   { background: var(--green); }
+
+    .status-sel {
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 6px 10px; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: .8rem; outline: none; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .status-sel:focus { border-color: var(--blue); }
+
+    /* Visitors section */
+    .vis-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; max-width: 700px; }
+    .vis-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px 22px; text-align: center;
+      box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+    }
+    .vis-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .vis-card.c-blue::after  { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+    .vis-card.c-green::after { background: linear-gradient(90deg, var(--green), #34d399); }
+    .vis-card.c-gold::after  { background: linear-gradient(90deg, var(--gold), #fbbf24); }
+    .vis-card .v-ico  { font-size: 2rem; margin-bottom: 12px; }
+    .vis-card .v-num  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .vis-card .v-lbl  { font-size: .75rem; color: var(--muted); margin-top: 6px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 60px 20px; }
+    .empty .e-ico { font-size: 3rem; margin-bottom: 16px; opacity: .35; }
+    .empty p { font-size: .88rem; color: var(--muted); }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-h));
+      color: #fff; border: none; border-radius: 10px;
+      padding: 10px 20px; font-family: 'Inter', sans-serif;
+      font-size: .86rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 3px 12px rgba(37,99,235,.25);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.3); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 18px; font-family: 'Inter', sans-serif;
+      font-size: .86rem; cursor: pointer; transition: all .2s;
+    }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+    /* ═══════════════════════════════════════════════
+       MODALS (shared)
+    ═══════════════════════════════════════════════ */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,23,42,.45);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 20px; width: 580px; max-width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: modalIn .25s ease both;
+    }
+    .modal.modal-lg { width: 680px; }
+    @keyframes modalIn { from { opacity: 0; transform: scale(.97) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 26px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--white); z-index: 2;
+      border-radius: 20px 20px 0 0;
+    }
+    .modal-head h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text); }
+    .modal-close {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center; transition: all .2s;
+    }
+    .modal-close:hover { background: var(--danger-bg); border-color: #fecaca; color: var(--danger); }
+
+    .modal-body { padding: 24px 26px; }
+    .modal-foot {
+      padding: 16px 26px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    /* Form fields */
+    .mf { margin-bottom: 18px; }
+    .mf label {
+      display: block; font-size: .72rem; font-weight: 700;
+      color: var(--muted); letter-spacing: .6px; text-transform: uppercase; margin-bottom: 7px;
+    }
+    .mf input, .mf textarea {
+      width: 100%; background: var(--blue-light);
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 11px 14px; font-family: 'Inter', sans-serif;
+      font-size: .88rem; color: var(--text); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .mf input:focus, .mf textarea:focus {
+      border-color: var(--blue); background: var(--white);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+    .mf input::placeholder, .mf textarea::placeholder { color: #94a3b8; }
+    .mf textarea { resize: vertical; min-height: 80px; }
+    .mrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .mf .hint { font-size: .71rem; color: var(--muted); margin-top: 5px; }
+    .mf .file-label {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--blue-light); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      font-size: .85rem; color: var(--muted); cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .mf .file-label:hover { border-color: var(--blue); color: var(--blue); }
+    .mf input[type="file"] { display: none; }
+
+    /* Feature tag input */
+    .ftag-wrap {
+      background: var(--blue-light); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 9px 12px; min-height: 46px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start;
+      cursor: text; transition: border-color .2s;
+    }
+    .ftag-wrap:focus-within { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .ftag {
+      background: var(--white); border: 1px solid var(--blue-soft);
+      color: var(--blue); padding: 3px 10px; border-radius: 7px;
+      font-size: .76rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .ftag .rm { cursor: pointer; color: var(--muted); font-size: .8rem; }
+    .ftag .rm:hover { color: var(--danger); }
+    .ftag-input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: .84rem; min-width: 140px; padding: 2px 4px;
+    }
+    .ftag-input::placeholder { color: #94a3b8; }
+
+    /* ═══════════════════════════════════════════════
+       VIEW MODAL – Domain detail
+    ═══════════════════════════════════════════════ */
+    .view-hero {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding-bottom: 20px; margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .view-img {
+      width: 100px; height: 100px; border-radius: 14px; object-fit: cover;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .view-img-ph {
+      width: 100px; height: 100px; border-radius: 14px;
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; flex-shrink: 0;
+    }
+    .view-hero-info { flex: 1; }
+    .view-domain-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 6px;
+    }
+    .view-domain-desc { font-size: .86rem; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+    .view-price-row { display: flex; align-items: center; gap: 10px; }
+    .view-price {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2rem; font-weight: 800; color: var(--green);
+    }
+    .view-price-lbl { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+
+    .view-section-title {
+      font-size: .72rem; font-weight: 700; color: var(--muted);
+      letter-spacing: .8px; text-transform: uppercase; margin-bottom: 12px;
+    }
+
+    .view-features {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
+    }
+    .view-feat-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--blue-light); border: 1px solid var(--blue-mid);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .view-feat-ico {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--blue); display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; color: #fff; flex-shrink: 0;
+    }
+    .view-feat-txt { font-size: .82rem; font-weight: 600; color: var(--text2); }
+
+    .view-meta {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px;
+    }
+    .view-meta-item {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .view-meta-item .m-lbl { font-size: .68rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+    .view-meta-item .m-val { font-size: .88rem; font-weight: 600; color: var(--text); }
+
+    /* Inquiry view */
+    .inq-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .inq-field {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 13px 15px;
+    }
+    .inq-field .if-lbl { font-size: .68rem; color: var(--muted); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 5px; }
+    .inq-field .if-val { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .inq-msg-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; font-size: .86rem;
+      color: var(--text2); line-height: 1.7; white-space: pre-wrap;
+    }
+    .inq-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), #60a5fa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+
+    /* Filter bar */
+    .filter-bar { display: flex; align-items: center; gap: 8px; }
+    .filter-sel {
+      background: var(--white); border: 1px solid var(--border);
+      color: var(--text2); padding: 8px 13px; border-radius: 9px;
+      font-family: 'Inter', sans-serif; font-size: .82rem; outline: none;
+      cursor: pointer; transition: border-color .2s;
+    }
+    .filter-sel:focus { border-color: var(--blue); }
+
+    @media (max-width: 900px) {
+      .stat-grid { grid-template-columns: repeat(2,1fr); }
+      .vis-grid { grid-template-columns: repeat(2,1fr); }
+      .view-features { grid-template-columns: 1fr; }
+      .view-meta { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     TOP NAVBAR
+═══════════════════════════════════════════════ -->
+<nav class="navbar">
+  <a class="nav-brand" href="#">
+    <div class="nav-brand-icon">🌐</div>
+    <div>
+      <h1>Domania</h1>
+    </div>
+  </a>
+  <div class="nav-div"></div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="nav-0" onclick="switchTab(0)">
+      <span class="tab-icon"><i class="fa fa-globe"></i></span>
+      Domains
+      <span class="tab-badge"><%= domains.length %></span>
+    </button>
+    <button class="nav-tab" id="nav-1" onclick="switchTab(1)">
+      <span class="tab-icon"><i class="fa fa-envelope"></i></span>
+      Inquiries
+      <% var newCount = inquiries.filter(i => i.status === 'new').length; %>
+      <% if (newCount > 0) { %>
+      <span class="tab-badge gold"><%= newCount %> new</span>
+      <% } %>
+    </button>
+    <button class="nav-tab" id="nav-2" onclick="switchTab(2)">
+      <span class="tab-icon"><i class="fa fa-chart-bar"></i></span>
+      Visitors
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-stat-chip">
+      <i class="fa fa-users" style="font-size:.75rem"></i>
+      <%= totalVisitors %> visitors
+    </div>
+    <a href="/admin/logout" class="nav-logout">
+      <i class="fa fa-right-from-bracket" style="font-size:.8rem"></i>
+      Sign Out
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- Alerts -->
+  <% if (success) { %>
+  <div class="alert-bar alert-success"><i class="fa fa-circle-check"></i> <%= success %></div>
+  <% } %>
+  <% if (error) { %>
+  <div class="alert-bar alert-error"><i class="fa fa-circle-exclamation"></i> <%= error %></div>
+  <% } %>
+
+  <!-- Summary stat cards (always visible) -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon si-blue"><span style="font-size:1.2rem">🌐</span></div>
+      <div class="stat-info">
+        <div class="val"><%= domains.length %></div>
+        <div class="lbl">Total Domains</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-gold"><span style="font-size:1.2rem">📬</span></div>
+      <div class="stat-info">
+        <div class="val"><%= inquiries.length %></div>
+        <div class="lbl">Total Inquiries</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green"><span style="font-size:1.2rem">🆕</span></div>
+      <div class="stat-info">
+        <div class="val"><%= inquiries.filter(i => i.status === 'new').length %></div>
+        <div class="lbl">New Inquiries</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-purple"><span style="font-size:1.2rem">👁️</span></div>
+      <div class="stat-info">
+        <div class="val"><%= totalVisitors %></div>
+        <div class="lbl">Unique Visitors</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE 0: DOMAINS ═══════════════════════ -->
+  <div class="page active" id="page-0">
+    <div class="page-header">
+      <div>
+        <h2>Domain Listings</h2>
+        <p>Manage all your domains for sale</p>
+      </div>
+      <button class="btn-primary" onclick="openAdd()">
+        <i class="fa fa-plus"></i> Add Domain
+      </button>
+    </div>
+
+    <% if (domains.length === 0) { %>
+    <div class="tbl-card">
+      <div class="empty">
+        <div class="e-ico">🌐</div>
+        <p>No domains yet. Click "Add Domain" to get started.</p>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="tbl-card">
+      <div class="tbl-card-head">
+        <div>
+          <h3>All Domains</h3>
+          <p><%= domains.length %> domain<%= domains.length !== 1 ? 's' : '' %> listed</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Domain</th>
+            <th>Price</th>
+            <th>Features</th>
+            <th>Added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% domains.forEach(domain => { %>
+          <tr>
+            <td>
+              <% if (domain.img) { %>
+                <img src="<%= domain.img %>" alt="<%= domain.name %>" class="d-thumb" />
+              <% } else { %>
+                <div class="d-thumb-ph">🌐</div>
+              <% } %>
+            </td>
+            <td>
+              <div class="d-name"><%= domain.name %></div>
+              <div class="d-desc"><%= (domain.description || '').substring(0, 55) %><%= (domain.description || '').length > 55 ? '…' : '' %></div>
+            </td>
+            <td><span class="price-tag">$<%= domain.price %></span></td>
+            <td>
+              <div class="feat-chips">
+                <% (domain.features || []).slice(0, 2).forEach(f => { %>
+                  <span class="feat-chip"><%= f %></span>
+                <% }) %>
+                <% if ((domain.features || []).length > 2) { %>
+                  <span class="feat-chip" style="background:var(--bg);color:var(--muted);">+<%= domain.features.length - 2 %> more</span>
+                <% } %>
+              </div>
+            </td>
+            <td style="color:var(--muted);font-size:.78rem;white-space:nowrap;"><%= new Date(domain.createdAt).toLocaleDateString('en-IN') %></td>
+            <td>
+              <div class="actions">
+                <!-- VIEW -->
+                <button class="act-btn act-view" title="View Details"
+                  onclick='viewDomain(
+                    "<%= domain.name %>",
+                    <%= domain.price %>,
+                    `<%= (domain.description||"").replace(/`/g,"\\`") %>`,
+                    "<%= domain.img || "" %>",
+                    <%- JSON.stringify(domain.features || []) %>,
+                    "<%= new Date(domain.createdAt).toLocaleDateString("en-IN") %>",
+                    "<%= domain._id %>"
+                  )'>
+                  <i class="fa fa-eye"></i>
+                </button>
+                <!-- EDIT -->
+                <button class="act-btn act-edit" title="Edit"
+                  onclick='openEdit(
+                    "<%= domain._id %>",
+                    "<%= domain.name.replace(/"/g,"&quot;") %>",
+                    <%= domain.price %>,
+                    `<%= (domain.description||"").replace(/`/g,"\\`") %>`,
+                    "<%= domain.img || "" %>",
+                    <%- JSON.stringify(domain.features || []) %>
+                  )'>
+                  <i class="fa fa-pen"></i>
+                </button>
+                <!-- DELETE -->
+                <form action="/admin/domains/<%= domain._id %>/delete" method="POST" style="display:inline;">
+                  <button type="submit" class="act-btn act-del" title="Delete"
+                    onclick="return confirm('Delete <%= domain.name %>? This cannot be undone.')">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- ═══ PAGE 1: INQUIRIES ═════════════════════ -->
+  <div class="page" id="page-1">
+    <div class="page-header">
+      <div>
+        <h2>Inquiries</h2>
+        <p>All buyer submissions from your contact form</p>
+      </div>
+      <div class="filter-bar">
+        <select id="inq-filter" class="filter-sel" onchange="filterInq()">
+          <option value="">All Status</option>
+          <option value="new">🟡 New</option>
+          <option value="contacted">🔵 Contacted</option>
+          <option value="closed">🟢 Closed</option>
+        </select>
+      </div>
+    </div>
+
+    <% if (inquiries.length === 0) { %>
+    <div class="tbl-card">
+      <div class="empty"><div class="e-ico">📬</div><p>No inquiries received yet.</p></div>
+    </div>
+    <% } else { %>
+    <div class="tbl-card">
+      <div class="tbl-card-head">
+        <div>
+          <h3>All Inquiries</h3>
+          <p><%= inquiries.length %> total &nbsp;·&nbsp; <%= inquiries.filter(i=>i.status==='new').length %> new</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Buyer</th>
+            <th>Domain Interest</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% inquiries.forEach(inq => { %>
+          <tr data-status="<%= inq.status %>">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#60a5fa);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#fff;flex-shrink:0;">
+                  <%= inq.name ? inq.name.charAt(0).toUpperCase() : '?' %>
+                </div>
+                <div>
+                  <div style="font-weight:600;font-size:.88rem;color:var(--text);"><%= inq.name %></div>
+                  <a href="mailto:<%= inq.email %>" style="font-size:.75rem;color:var(--blue);text-decoration:none;"><%= inq.email %></a>
+                </div>
+              </div>
+            </td>
+            <td style="font-weight:600;color:var(--text);font-size:.85rem;"><%= inq.interestedDomain || '—' %></td>
+            <td style="max-width:200px;font-size:.8rem;color:var(--muted);">
+              <%= (inq.message || '').substring(0, 55) %><%= (inq.message || '').length > 55 ? '…' : '' %>
+            </td>
+            <td style="font-size:.78rem;color:var(--muted);white-space:nowrap;"><%= new Date(inq.createdAt).toLocaleDateString('en-IN') %></td>
+            <td>
+              <form action="/admin/inquiries/<%= inq._id %>/status" method="POST">
+                <select name="status" class="status-sel" onchange="this.form.submit()">
+                  <option value="new"       <%= inq.status==='new'?'selected':'' %>>🟡 New</option>
+                  <option value="contacted" <%= inq.status==='contacted'?'selected':'' %>>🔵 Contacted</option>
+                  <option value="closed"    <%= inq.status==='closed'?'selected':'' %>>🟢 Closed</option>
+                </select>
+              </form>
+            </td>
+            <td>
+              <button class="act-btn act-view" title="View Full Inquiry"
+                onclick='viewInquiry(
+                  "<%= inq.name %>",
+                  "<%= inq.email %>",
+                  "<%= inq.phone || "" %>",
+                  "<%= inq.interestedDomain || "" %>",
+                  `<%= (inq.message||"").replace(/`/g,"\\`") %>`,
+                  "<%= new Date(inq.createdAt).toLocaleString("en-IN") %>",
+                  "<%= inq.status %>"
+                )'>
+                <i class="fa fa-eye"></i>
+              </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- ═══ PAGE 2: VISITORS ══════════════════════ -->
+  <div class="page" id="page-2">
+    <div class="page-header">
+      <div>
+        <h2>Visitor Analytics</h2>
+        <p>Cookie-based unique visitor tracking (24-hour window)</p>
+      </div>
+    </div>
+    <div class="vis-grid">
+      <div class="vis-card c-blue">
+        <div class="v-ico">👁️</div>
+        <div class="v-num"><%= totalVisitors %></div>
+        <div class="v-lbl">Unique Visitors</div>
+      </div>
+      <div class="vis-card c-green">
+        <div class="v-ico">📬</div>
+        <div class="v-num"><%= inquiries.length %></div>
+        <div class="v-lbl">Total Inquiries</div>
+      </div>
+      <div class="vis-card c-gold">
+        <div class="v-ico">💰</div>
+        <div class="v-num"><%= inquiries.filter(i=>i.status==='closed').length %></div>
+        <div class="v-lbl">Deals Closed</div>
+      </div>
+    </div>
+    <div style="margin-top:20px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:14px;padding:18px 22px;max-width:700px;">
+      <p style="font-size:.83rem;color:var(--text2);line-height:1.7;">
+        <i class="fa fa-circle-info" style="color:var(--blue);margin-right:6px;"></i>
+        Visitor tracking uses a <strong>24-hour cookie</strong>. Each unique browser/device is counted once per day.
+        For deeper analytics, integrate <strong>Google Analytics</strong> or <strong>Plausible</strong> into your frontend page.
+      </p>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════
+     DOMAIN VIEW MODAL
+═══════════════════════════════════════════════ -->
+<div class="overlay" id="view-overlay">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="vm-title">Domain Details</h3>
+      <button class="modal-close" onclick="closeOverlay('view-overlay')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Hero -->
+      <div class="view-hero">
+        <div id="vm-img-wrap"></div>
+        <div class="view-hero-info">
+          <div class="view-domain-name" id="vm-name">—</div>
+          <div class="view-domain-desc" id="vm-desc">—</div>
+          <div class="view-price-row">
+            <div class="view-price" id="vm-price">—</div>
+            <div class="view-price-lbl">Listing Price</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <p class="view-section-title">Included Features</p>
+      <div class="view-features" id="vm-features"></div>
+
+      <!-- Meta -->
+      <p class="view-section-title">Domain Info</p>
+      <div class="view-meta">
+        <div class="view-meta-item">
+          <div class="m-lbl">Domain Name</div>
+          <div class="m-val" id="vm-meta-name">—</div>
+        </div>
+        <div class="view-meta-item">
+          <div class="m-lbl">Listing Price</div>
+          <div class="m-val" id="vm-meta-price" style="color:var(--green)">—</div>
+        </div>
+        <div class="view-meta-item">
+          <div class="m-lbl">Date Added</div>
+          <div class="m-val" id="vm-meta-date">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOverlay('view-overlay')">Close</button>
+      <button class="btn-primary" id="vm-edit-btn" onclick="">
+        <i class="fa fa-pen"></i> Edit Domain
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     INQUIRY VIEW MODAL
+═══════════════════════════════════════════════ -->
+<div class="overlay" id="inq-view-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Inquiry Details</h3>
+      <button class="modal-close" onclick="closeOverlay('inq-view-overlay')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+        <div class="inq-avatar" id="iv-avatar">?</div>
+        <div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);" id="iv-name">—</div>
+          <a id="iv-email-link" href="#" style="font-size:.84rem;color:var(--blue);text-decoration:none;" id="iv-email">—</a>
+        </div>
+        <div style="margin-left:auto;" id="iv-status-badge"></div>
+      </div>
+
+      <div class="inq-detail-grid">
+        <div class="inq-field">
+          <div class="if-lbl">📱 Phone</div>
+          <div class="if-val" id="iv-phone">—</div>
+        </div>
+        <div class="inq-field">
+          <div class="if-lbl">🌐 Interested Domain</div>
+          <div class="if-val" id="iv-domain">—</div>
+        </div>
+        <div class="inq-field">
+          <div class="if-lbl">📅 Submitted On</div>
+          <div class="if-val" id="iv-date">—</div>
+        </div>
+        <div class="inq-field">
+          <div class="if-lbl">📊 Status</div>
+          <div class="if-val" id="iv-status">—</div>
+        </div>
+      </div>
+
+      <p class="view-section-title">Message</p>
+      <div class="inq-msg-box" id="iv-message">—</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOverlay('inq-view-overlay')">Close</button>
+      <a id="iv-reply-btn" href="#" class="btn-primary" style="text-decoration:none;">
+        <i class="fa fa-envelope"></i> Reply via Email
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ADD / EDIT DOMAIN MODAL
+═══════════════════════════════════════════════ -->
+<div class="overlay" id="form-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="form-title">Add New Domain</h3>
+      <button class="modal-close" onclick="closeOverlay('form-overlay')">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="domain-form" action="/admin/domains" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="id" id="f-id" />
+
+        <div class="mrow">
+          <div class="mf">
+            <label>Domain Name <span style="color:var(--danger)">*</span></label>
+            <input type="text" name="name" id="f-name" placeholder="example.com" required />
+          </div>
+          <div class="mf">
+            <label>Price (USD) <span style="color:var(--danger)">*</span></label>
+            <input type="number" name="price" id="f-price" placeholder="375" min="1" required />
+          </div>
+        </div>
+
+        <div class="mf">
+          <label>Description <span style="color:var(--danger)">*</span></label>
+          <textarea name="description" id="f-desc" placeholder="Short description about this domain..." required></textarea>
+        </div>
+
+        <div class="mf">
+          <label>Feature Points <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;">&nbsp;— press Enter to add each</span></label>
+          <div class="ftag-wrap" id="ftag-wrap" onclick="document.getElementById('ftag-input').focus()">
+            <input id="ftag-input" class="ftag-input" placeholder="Type a feature and press Enter…" onkeydown="addFTag(event)" />
+          </div>
+          <textarea name="features" id="f-features" style="display:none;"></textarea>
+          <p class="hint">e.g. Free Domain Registration · Free Security Suite · Strong Keywords</p>
+        </div>
+
+        <div class="mf">
+          <label>Domain Image <span style="color:var(--danger)">*</span></label>
+          <label class="file-label" for="f-img">
+            <i class="fa fa-cloud-arrow-up" style="color:var(--blue)"></i>
+            <span id="file-display">Click to upload image (JPG, PNG, WebP)</span>
+          </label>
+          <input type="file" name="img" id="f-img" accept="image/*" onchange="updateFileName(this)" />
+          <p class="hint" id="img-hint" style="display:none;color:var(--blue);">ℹ Leave blank to keep the existing image</p>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeOverlay('form-overlay')">Cancel</button>
+      <button class="btn-primary" onclick="document.getElementById('domain-form').submit()">
+        <i class="fa fa-save"></i> <span id="form-submit-lbl">Save Domain</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+  // ── Tab switching ──────────────────────────────
+  function switchTab(n) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + n).classList.add('active');
+    document.getElementById('nav-' + n).classList.add('active');
+  }
+
+  // ── Overlay helpers ────────────────────────────
+  function openOverlay(id) { document.getElementById(id).classList.add('show'); }
+  function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+  document.querySelectorAll('.overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
+  });
+
+  // ── Inquiry filter ─────────────────────────────
+  function filterInq() {
+    const val = document.getElementById('inq-filter').value;
+    document.querySelectorAll('#page-1 tbody tr').forEach(tr => {
+      tr.style.display = (!val || tr.dataset.status === val) ? '' : 'none';
+    });
+  }
+
+  // ── Feature tags (form modal) ──────────────────
+  let fTags = [];
+  function renderFTags() {
+    const wrap = document.getElementById('ftag-wrap');
+    const inp  = document.getElementById('ftag-input');
+    wrap.querySelectorAll('.ftag').forEach(c => c.remove());
+    fTags.forEach((tag, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'ftag';
+      chip.innerHTML = tag + `<span class="rm" onclick="removeFTag(${i})">×</span>`;
+      wrap.insertBefore(chip, inp);
+    });
+    document.getElementById('f-features').value = fTags.join('\n');
+  }
+  function addFTag(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const v = e.target.value.trim();
+      if (v && !fTags.includes(v)) { fTags.push(v); e.target.value = ''; renderFTags(); }
+    }
+  }
+  function removeFTag(i) { fTags.splice(i,1); renderFTags(); }
+
+  // ── Add domain modal ───────────────────────────
+  function openAdd() {
+    document.getElementById('form-title').textContent = 'Add New Domain';
+    document.getElementById('domain-form').action = '/admin/domains';
+    document.getElementById('f-id').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-price').value = '';
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-img').value = '';
+    document.getElementById('file-display').textContent = 'Click to upload image (JPG, PNG, WebP)';
+    document.getElementById('img-hint').style.display = 'none';
+    document.getElementById('form-submit-lbl').textContent = 'Save Domain';
+    fTags = ['Free Domain Registration', 'Free Security Suite', 'Strong Keywords', 'Quality Rankings'];
+    renderFTags();
+    openOverlay('form-overlay');
+  }
+
+  // ── Edit domain modal ──────────────────────────
+  function openEdit(id, name, price, desc, img, features) {
+    document.getElementById('form-title').textContent = 'Edit Domain';
+    document.getElementById('domain-form').action = '/admin/domains/' + id + '/edit';
+    document.getElementById('f-id').value = id;
+    document.getElementById('f-name').value = name;
+    document.getElementById('f-price').value = price;
+    document.getElementById('f-desc').value = desc;
+    document.getElementById('f-img').value = '';
+    document.getElementById('file-display').textContent = img ? '🖼 Current image kept' : 'Click to upload';
+    document.getElementById('img-hint').style.display = 'block';
+    document.getElementById('form-submit-lbl').textContent = 'Update Domain';
+    fTags = Array.isArray(features) ? [...features] : [];
+    renderFTags();
+    openOverlay('form-overlay');
+  }
+
+  function updateFileName(input) {
+    const name = input.files[0] ? input.files[0].name : 'Click to upload';
+    document.getElementById('file-display').textContent = '📁 ' + name;
+  }
+
+  // ── View domain modal ──────────────────────────
+  const featureIcons = ['🎁','🛡️','🔑','📈','⭐','🚀','💡','✅','🌍','🏆'];
+  function viewDomain(name, price, desc, img, features, date, id) {
+    document.getElementById('vm-title').textContent = name;
+    document.getElementById('vm-name').textContent  = name;
+    document.getElementById('vm-desc').textContent  = desc;
+    document.getElementById('vm-price').textContent = '$' + price;
+    document.getElementById('vm-meta-name').textContent  = name;
+    document.getElementById('vm-meta-price').textContent = '$' + price;
+    document.getElementById('vm-meta-date').textContent  = date;
+
+    // Image
+    const imgWrap = document.getElementById('vm-img-wrap');
+    if (img) {
+      imgWrap.innerHTML = `<img src="${img}" alt="${name}" class="view-img" />`;
+    } else {
+      imgWrap.innerHTML = `<div class="view-img-ph">🌐</div>`;
+    }
+
+    // Features
+    const featEl = document.getElementById('vm-features');
+    featEl.innerHTML = (features && features.length > 0)
+      ? features.map((f,i) => `
+          <div class="view-feat-item">
+            <div class="view-feat-ico">${featureIcons[i % featureIcons.length]}</div>
+            <div class="view-feat-txt">${f}</div>
+          </div>`).join('')
+      : '<p style="color:var(--muted);font-size:.84rem;">No features listed.</p>';
+
+    // Edit button wires up to openEdit
+    document.getElementById('vm-edit-btn').setAttribute('onclick',
+      `closeOverlay('view-overlay'); openEdit("${id}","${name.replace(/"/g,'&quot;')}",${price},\`${desc.replace(/`/g,'\\`')}\`,"${img}", ${JSON.stringify(features)})`
+    );
+
+    openOverlay('view-overlay');
+  }
+
+  // ── View inquiry modal ─────────────────────────
+  function viewInquiry(name, email, phone, domain, message, date, status) {
+    document.getElementById('iv-avatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('iv-name').textContent   = name;
+    document.getElementById('iv-email').textContent  = email;
+    document.getElementById('iv-email-link').href    = 'mailto:' + email;
+    document.getElementById('iv-phone').textContent  = phone || 'Not provided';
+    document.getElementById('iv-domain').textContent = domain || 'Not specified';
+    document.getElementById('iv-date').textContent   = date;
+    document.getElementById('iv-message').textContent = message || 'No message.';
+    document.getElementById('iv-reply-btn').href     = 'mailto:' + email;
+
+    // Status badge
+    const sb = document.getElementById('iv-status-badge');
+    const cls = { new:'badge-new', contacted:'badge-contacted', closed:'badge-closed' }[status] || 'badge-new';
+    const lbl = { new:'🟡 New', contacted:'🔵 Contacted', closed:'🟢 Closed' }[status] || status;
+    sb.innerHTML = `<span class="badge ${cls}">${lbl}</span>`;
+    document.getElementById('iv-status').textContent = lbl;
+
+    openOverlay('inq-view-overlay');
+  }
+
+  // ── Auto-dismiss alerts ────────────────────────
+  setTimeout(() => {
+    document.querySelectorAll('.alert-bar').forEach(el => {
+      el.style.transition = 'opacity .5s';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 4000);
+</script>
+
+</body>
+</html>

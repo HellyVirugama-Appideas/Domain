@@ -1,0 +1,118 @@
+<!-- ═══════════════════════════════
+     PAGE 2: VISITORS
+═══════════════════════════════ -->
+<div class="page" id="page-2">
+  <div class="page-header">
+    <div><h2>Visitor Analytics</h2><p>Every unique visitor — browser, device, clicks & pages tracked</p></div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="vis-grid">
+    
+    <div class="vis-card c-gold">
+      <div class="v-ico">🖱️</div>
+      <div class="v-num"><%= totalClicks %></div>
+      <div class="v-lbl">Total Clicks</div>
+    </div>
+    <div class="vis-card c-green">
+      <div class="v-ico">📬</div>
+      <div class="v-num"><%= inquiries.length %></div>
+      <div class="v-lbl">Inquiries</div>
+    </div>
+  
+  </div>
+
+  <!-- Visitor detail table -->
+  <% if(visitors.length === 0){ %>
+    <div class="tbl-card">
+      <div class="empty">
+        <div class="e-ico">👁️</div>
+        <p>No visitors tracked yet. Make sure your frontend calls <code>/api/public/track-visit</code> on page load.</p>
+      </div>
+    </div>
+  <% } else { %>
+  <div class="tbl-card">
+    <div class="tbl-head">
+      <div><h3>Visitor Details</h3><p>Last <%= visitors.length %> unique visitors</p></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>IP Address</th>
+          <th>Browser</th>
+          <th>OS</th>
+          <th>Device</th>
+          <th>Clicks</th>
+          <th>Pages Visited</th>
+          <th>First Visit</th>
+          <th>Last Seen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% var maxClicks = Math.max.apply(null, visitors.map(function(v){ return v.clicks||1; })); %>
+        <% visitors.forEach(function(v, idx){ %>
+        <tr>
+          <td style="color:var(--muted);font-size:.78rem;font-weight:600;"><%= idx+1 %></td>
+          <td style="font-family:monospace;font-size:.82rem;color:var(--text2);"><%= v.ip||'—' %></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:.95rem;">
+                <% if(v.browser==='Chrome'){ %>🌐
+                <% } else if(v.browser==='Firefox'){ %>🦊
+                <% } else if(v.browser==='Safari'){ %>🧭
+                <% } else if(v.browser==='Edge'){ %>🔷
+                <% } else { %>🌍<% } %>
+              </span>
+              <span style="font-size:.82rem;font-weight:500;color:var(--text);"><%= v.browser||'Unknown' %></span>
+            </div>
+          </td>
+          <td style="font-size:.82rem;color:var(--text2);"><%= v.os||'Unknown' %></td>
+          <td>
+            <span class="dev-chip <%= v.device==='Mobile'?'dev-mobile':v.device==='Tablet'?'dev-tablet':'dev-desktop' %>">
+              <% if(v.device==='Mobile'){ %>📱
+              <% } else if(v.device==='Tablet'){ %>📟
+              <% } else { %>💻<% } %>
+              <%= v.device||'Desktop' %>
+            </span>
+          </td>
+          <td>
+            <div class="click-bar">
+              <span class="click-num"><%= v.clicks||1 %></span>
+              <div class="bar-wrap">
+                <div class="bar-fill" style="width:<%= Math.round(((v.clicks||1)/maxClicks)*100) %>%"></div>
+              </div>
+            </div>
+          </td>
+          <td style="max-width:180px;">
+            <div style="display:flex;flex-wrap:wrap;gap:3px;">
+              <% (v.pages||['/']).slice(0,3).forEach(function(pg){ %>
+                <span style="background:var(--blue-light);color:var(--blue);font-size:.68rem;padding:2px 6px;border-radius:5px;white-space:nowrap;"><%= pg %></span>
+              <% }); %>
+              <% if((v.pages||[]).length>3){ %>
+                <span style="background:var(--bg);color:var(--muted);font-size:.68rem;padding:2px 6px;border-radius:5px;">+<%= v.pages.length-3 %></span>
+              <% } %>
+            </div>
+          </td>
+          <td style="font-size:.76rem;color:var(--muted);white-space:nowrap;">
+            <%= new Date(v.createdAt).toLocaleDateString('en-IN') %>
+          </td>
+          <td style="font-size:.76rem;color:var(--muted);white-space:nowrap;">
+            <%= v.lastSeen ? new Date(v.lastSeen).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—' %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+
+  <div style="margin-top:16px;background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:12px;padding:14px 18px;max-width:800px;">
+    <p style="font-size:.82rem;color:var(--text2);line-height:1.7;">
+      <i class="fa fa-circle-info" style="color:var(--blue);margin-right:6px;"></i>
+      Tracking uses a <strong>365-day cookie</strong> per browser. Each return visit increments click count. Call
+      <code style="background:var(--white);padding:1px 6px;border-radius:4px;font-size:.78rem;">/api/public/track-visit?page=/your-page</code>
+      from your frontend on every page load.
+    </p>
+  </div>
+</div>
