@@ -39,8 +39,6 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>IP Address</th>
-          <th>Browser</th>
           <th>OS</th>
           <th>Device</th>
           <th>Clicks</th>
@@ -55,18 +53,6 @@
         <tr>
           <td style="color:var(--muted);font-size:.78rem;font-weight:600;"><%= idx+1 %></td>
           <td style="font-family:monospace;font-size:.82rem;color:var(--text2);"><%= v.ip||'—' %></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:.95rem;">
-                <% if(v.browser==='Chrome'){ %>🌐
-                <% } else if(v.browser==='Firefox'){ %>🦊
-                <% } else if(v.browser==='Safari'){ %>🧭
-                <% } else if(v.browser==='Edge'){ %>🔷
-                <% } else { %>🌍<% } %>
-              </span>
-              <span style="font-size:.82rem;font-weight:500;color:var(--text);"><%= v.browser||'Unknown' %></span>
-            </div>
-          </td>
           <td style="font-size:.82rem;color:var(--text2);"><%= v.os||'Unknown' %></td>
           <td>
             <span class="dev-chip <%= v.device==='Mobile'?'dev-mobile':v.device==='Tablet'?'dev-tablet':'dev-desktop' %>">
