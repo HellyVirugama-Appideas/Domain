@@ -120,12 +120,41 @@ const transporter = nodemailer.createTransport({
 });
 
 // Get all domains for landing page
+// exports.getAllDomains = async (req, res) => {
+//   try {
+//     const domains = await Domain.find().sort({ createdAt: -1 });
+//     res.json(domains);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 exports.getAllDomains = async (req, res) => {
   try {
     const domains = await Domain.find().sort({ createdAt: -1 });
-    res.json(domains);
+ 
+    // img mein full URL banao — IMGURL env se
+    // DB mein: "/uploads/filename.jpg"
+    // IMGURL:  "https://domain-zae7.onrender.com/uploads"
+    // Result:  "https://domain-zae7.onrender.com/uploads/filename.jpg"
+    const imgBase = (process.env.Imgurl || '').replace(/\/$/, ''); // trailing slash hatao
+ 
+    const domainsWithFullImg = domains.map(d => {
+      const obj = d.toObject();
+      if (obj.img && imgBase) {
+        // agar img already full URL hai to as-is rakho
+        if (!obj.img.startsWith('http')) {
+          // "/uploads/filename.jpg" → just filename nikalo
+          const filename = obj.img.replace(/^\/uploads\//, '');
+          obj.img = imgBase + '/' + filename;
+        }
+      }
+      return obj;
+    });
+ 
+    res.json(domainsWithFullImg);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 };
