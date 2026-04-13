@@ -61,7 +61,7 @@ const app = express();
 
 // ====================== CORS - Strong Configuration ======================
 app.use(cors({
-  origin: 'https://domain-selling-eight.vercel.app',
+  origin: 'https://domain-selling-eight.vercel.app, http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
